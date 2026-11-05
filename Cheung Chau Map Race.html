@@ -1,0 +1,266 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Cheung Chau Map Race</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@600;800&display=swap">
+<style>
+/* Layout: a sea chart on top (one lane per group, 11 stops from the pier to the treasure), the challenge card below it. Single bright seaside theme, made for a classroom projector. */
+:root{
+  --sea:#1F6FB2; --sea-deep:#12344f; --water:#CFE6F7; --foam:#EAF5FD;
+  --sand:#FFF1C9; --sand-edge:#e8cd7a; --coral:#F2714B; --sun:#FFD23F;
+  --ink:#1d2433; --muted:#4a5568; --paper:#ffffff; --good:#2E9E5B;
+  --display:'Baloo 2', 'Noto Sans TC', system-ui, sans-serif;
+  --body:'Nunito', 'Noto Sans TC', system-ui, sans-serif;
+  color-scheme: light;
+}
+html,body{height:100%}
+body{background:var(--water);color:var(--ink);font-family:var(--body);font-size:16px}
+.wrap{box-sizing:border-box;max-width:1320px;margin:0 auto;display:flex;flex-direction:column;gap:14px;
+  padding-block:16px 24px;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+header{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+h1{margin:0;font-family:var(--display);font-weight:800;font-size:clamp(26px,3.6vw,44px);line-height:1;color:var(--sea-deep);text-wrap:balance}
+h1 span{color:var(--coral)}
+.spacer{flex:1}
+.ctl{display:flex;align-items:center;gap:6px;font-weight:800;font-size:14px;background:var(--paper);border-radius:999px;padding:4px 6px 4px 14px}
+.ctl button{font:800 16px var(--display);width:38px;height:38px;border-radius:50%;border:2px solid var(--sea);background:var(--paper);color:var(--sea);cursor:pointer}
+.ctl button[aria-pressed="true"]{background:var(--sea);color:var(--paper)}
+.tool{font:800 15px var(--body);border:2.5px solid var(--sea);background:var(--paper);color:var(--sea);border-radius:999px;padding:8px 16px;min-height:44px;cursor:pointer}
+.tool:hover{background:var(--foam)}
+button:focus-visible{outline:4px solid var(--sun);outline-offset:3px}
+.help{background:var(--paper);border-radius:16px;padding:12px 18px;line-height:1.55;font-weight:600;font-size:15px}
+.help b{color:var(--sea-deep)}
+
+/* map */
+.mapbox{background:var(--foam);border:4px solid var(--sea);border-radius:24px;padding:12px;overflow-x:auto}
+.map{min-width:880px;display:grid;grid-template-columns:150px repeat(11,minmax(0,1fr));gap:4px 4px;align-items:center}
+.stop{font-weight:800;font-size:12px;line-height:1.15;text-align:center;color:var(--sea-deep);padding:0 2px 4px;align-self:end}
+.stop.end{color:var(--coral)}
+.gname{font-family:var(--display);font-weight:800;font-size:19px;display:flex;align-items:center;gap:8px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dot{width:16px;height:16px;border-radius:50%;background:var(--c);flex-shrink:0;border:2px solid var(--ink)}
+.cell{height:46px;border-radius:12px;background:var(--water);display:flex;align-items:center;justify-content:center;position:relative}
+.cell.land{background:var(--sand)}
+.cell.goal{background:var(--sun)}
+.cell .ship{width:44px;height:38px;transition:transform .3s}
+.cell .ship.go{animation:sail .6s}
+@keyframes sail{30%{transform:translateY(-10px) rotate(-8deg)}}
+.cell .steps{position:absolute;right:4px;bottom:2px;font:800 11px var(--body);color:var(--muted)}
+
+/* card */
+.card{background:var(--paper);border-radius:28px;border:5px solid var(--ctype);padding:18px clamp(16px,3vw,36px) 22px;display:flex;flex-direction:column;gap:14px;min-height:340px;box-sizing:border-box}
+.card .top{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.type{font-weight:800;font-size:15px;border-radius:999px;padding:5px 14px;background:var(--ctype);color:var(--paper)}
+.worth{font:800 15px var(--body);border-radius:999px;padding:5px 12px;background:var(--sand);color:var(--ink)}
+.count{font-weight:700;color:var(--muted);font-size:14px}
+.timer{flex:1;min-width:100px;height:14px;border-radius:999px;background:#e6edf3;overflow:hidden}
+.timer i{display:block;height:100%;width:100%;background:var(--sun)}
+.timer.run i{animation:drain linear forwards}
+@keyframes drain{to{width:0}}
+.secs{font:800 22px var(--display);min-width:2ch;text-align:right;font-variant-numeric:tabular-nums}
+.body{display:flex;align-items:center;justify-content:center;gap:28px;flex-wrap:wrap;flex:1}
+.prompt{font-family:var(--display);font-weight:800;font-size:clamp(30px,4.4vw,58px);line-height:1.1;text-align:center;color:var(--sea-deep);margin:0;text-wrap:balance}
+.prompt .gap{display:inline-block;min-width:3.2em;border-bottom:5px solid var(--ink)}
+.sub{text-align:center;font-weight:700;font-size:clamp(16px,1.8vw,22px);color:var(--muted)}
+.pic svg{width:min(240px,55vw);height:auto;display:block}
+.tiles{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.tiles b{font:800 clamp(32px,4.6vw,58px) var(--display);width:1.45em;height:1.45em;display:flex;align-items:center;justify-content:center;background:var(--sand);border-radius:14px;box-shadow:0 5px 0 var(--sand-edge)}
+.choices{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+.choices span{font:800 clamp(20px,2.4vw,30px) var(--display);border:3px solid var(--sea);border-radius:16px;padding:6px 18px}
+.answer{font:800 clamp(30px,4vw,52px) var(--display);text-align:center;color:var(--good);margin:0}
+.answer small{display:block;font:700 clamp(16px,1.8vw,22px) var(--body);color:var(--muted)}
+.row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;align-items:center}
+.big{font:800 22px var(--display);border:none;border-radius:999px;padding:10px 30px;min-height:56px;cursor:pointer;background:var(--sea);color:var(--paper)}
+.big.alt{background:var(--coral)}
+.big:disabled{opacity:.4;cursor:default}
+.gbtn{font:800 18px var(--display);border:3px solid var(--c);color:var(--ink);background:var(--paper);border-radius:999px;padding:8px 16px;min-height:48px;cursor:pointer;display:flex;align-items:center;gap:8px}
+.gbtn[aria-pressed="true"]{background:var(--c);color:var(--paper)}
+.gbtn .dot{border-color:var(--ink)}
+.gbtn[aria-pressed="true"] .dot{background:var(--paper)}
+.note{font-weight:700;color:var(--muted);text-align:center;font-size:15px}
+.win{text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px}
+.win svg{width:min(200px,50vw);height:auto}
+.confetti{position:fixed;inset:0;pointer-events:none;z-index:30;overflow:hidden}
+.confetti i{position:absolute;top:-20px;width:12px;height:18px;border-radius:3px;animation:fall 1.7s ease-in forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(540deg)}}
+@media (prefers-reduced-motion: reduce){*{animation-duration:.01ms !important;transition:none !important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Cheung Chau <span>Map Race</span></h1>
+    <div class="spacer"></div>
+    <div class="ctl" role="group" aria-label="Number of groups">Groups
+      <button type="button" data-n="2">2</button><button type="button" data-n="3">3</button><button type="button" data-n="4">4</button><button type="button" data-n="5">5</button><button type="button" data-n="6">6</button>
+    </div>
+    <button class="tool" id="btnHelp" type="button">How to play 玩法</button>
+    <button class="tool" id="btnReset" type="button">New game</button>
+  </header>
+
+  <div class="help" id="help" hidden>
+    <b>How to play:</b> Each group needs a mini whiteboard or paper. Click <b>Next card</b>. Groups write the answer before time runs out and hold it up. Click <b>Show answer</b>, tap every group that got it right, then <b>Move ships</b>. Ships sail 1 or 2 stops. First ship to the treasure wins!<br>
+    <b>玩法：</b>每組準備白板或紙。按 Next card 出題，各組在限時內寫答案並舉起。按 Show answer，再點選答對的組，按 Move ships，答對的船前進 1 或 2 格。最先到達寶藏的組勝出！
+  </div>
+
+  <div class="mapbox"><div class="map" id="map"></div></div>
+
+  <section class="card" id="card" aria-live="polite"></section>
+</div>
+<div class="confetti" id="confetti"></div>
+
+<script>
+(function(){
+const S='stroke="#1d2433" stroke-width="2.5" stroke-linejoin="round"';
+const PIC={
+ ferry:`<svg viewBox="0 0 130 82" role="img" aria-label="picture"><rect x="38" y="20" width="54" height="22" rx="4" fill="#fff" ${S}></rect><rect x="58" y="6" width="12" height="14" fill="#F2714B" ${S}></rect><circle cx="50" cy="31" r="4" fill="#9cc5e6"></circle><circle cx="65" cy="31" r="4" fill="#9cc5e6"></circle><circle cx="80" cy="31" r="4" fill="#9cc5e6"></circle><path d="M12 42 L118 42 L104 62 L26 62 Z" fill="#F2714B" ${S}></path><path d="M4 72 Q14 64 24 72 T44 72 T64 72 T84 72 T104 72 T124 72" fill="none" stroke="#1F6FB2" stroke-width="3" stroke-linecap="round"></path></svg>`,
+ bus:`<svg viewBox="0 0 130 82" role="img" aria-label="picture"><rect x="12" y="14" width="106" height="50" rx="10" fill="#FFD23F" ${S}></rect><rect x="22" y="22" width="20" height="16" rx="3" fill="#fff" ${S}></rect><rect x="48" y="22" width="20" height="16" rx="3" fill="#fff" ${S}></rect><rect x="74" y="22" width="20" height="16" rx="3" fill="#fff" ${S}></rect><rect x="100" y="22" width="12" height="30" rx="3" fill="#fff" ${S}></rect><circle cx="36" cy="66" r="9" fill="#1d2433"></circle><circle cx="94" cy="66" r="9" fill="#1d2433"></circle></svg>`,
+ plane:`<svg viewBox="0 0 130 82" role="img" aria-label="picture"><path d="M14 44 Q14 34 30 34 L104 34 Q120 34 122 42 Q120 50 104 50 L30 50 Q14 50 14 44 Z" fill="#fff" ${S}></path><path d="M58 36 L44 10 L56 10 L80 36 Z" fill="#9cc5e6" ${S}></path><path d="M58 48 L44 74 L56 74 L80 48 Z" fill="#9cc5e6" ${S}></path><path d="M18 36 L10 18 L20 18 L32 34 Z" fill="#F2714B" ${S}></path></svg>`,
+ tricycle:`<svg viewBox="0 0 140 96" role="img" aria-label="picture"><circle cx="34" cy="70" r="20" fill="#fff" ${S}></circle><circle cx="34" cy="70" r="4" fill="#1d2433"></circle><circle cx="106" cy="74" r="15" fill="#fff" ${S}></circle><circle cx="118" cy="74" r="15" fill="#fff" ${S}></circle><path d="M34 70 L48 30 M44 40 L110 60 L112 74 M80 50 L84 36" fill="none" stroke="#F2714B" stroke-width="5" stroke-linecap="round"></path><rect x="72" y="28" width="24" height="8" rx="4" fill="#1F6FB2" ${S}></rect><path d="M40 30 L58 30" stroke="#1d2433" stroke-width="5" stroke-linecap="round"></path></svg>`,
+ fishballs:`<svg viewBox="0 0 110 90" role="img" aria-label="picture"><line x1="55" y1="4" x2="55" y2="88" stroke="#B5833F" stroke-width="4" stroke-linecap="round"></line><circle cx="55" cy="20" r="15" fill="#F0B24A" ${S}></circle><circle cx="55" cy="47" r="15" fill="#F0B24A" ${S}></circle><circle cx="49" cy="15" r="3" fill="#fff"></circle><circle cx="49" cy="42" r="3" fill="#fff"></circle></svg>`,
+ mochi:`<svg viewBox="0 0 110 84" role="img" aria-label="picture"><ellipse cx="55" cy="70" rx="48" ry="9" fill="#DCEEFB" ${S}></ellipse><path d="M18 66 Q16 34 38 34 Q58 34 58 66 Z" fill="#fff" ${S}></path><path d="M52 66 Q50 30 72 30 Q94 30 92 66 Z" fill="#fff" ${S}></path><rect x="62" y="38" width="16" height="10" rx="3" fill="#FFD23F" stroke="#1d2433" stroke-width="1.5"></rect><rect x="28" y="42" width="14" height="9" rx="3" fill="#FFD23F" stroke="#1d2433" stroke-width="1.5"></rect></svg>`,
+ watermelon:`<svg viewBox="0 0 110 90" role="img" aria-label="picture"><rect x="50" y="56" width="10" height="30" rx="4" fill="#E8C48A" ${S}></rect><path d="M18 14 L92 14 L55 64 Z" fill="#F2714B" ${S}></path><path d="M14 8 L96 8 L92 16 L18 16 Z" fill="#4CAF50" ${S}></path><ellipse cx="42" cy="28" rx="2.5" ry="4" fill="#1d2433"></ellipse><ellipse cx="60" cy="26" rx="2.5" ry="4" fill="#1d2433"></ellipse><ellipse cx="52" cy="42" rx="2.5" ry="4" fill="#1d2433"></ellipse><path d="M84 30 l6 -4 M86 38 l7 0 M20 30 l-6 -4" stroke="#5aa4dc" stroke-width="2.5" stroke-linecap="round"></path></svg>`,
+ island:`<svg viewBox="0 0 140 90" role="img" aria-label="picture"><circle cx="112" cy="20" r="12" fill="#FFD23F" ${S}></circle><path d="M14 66 Q40 22 70 40 Q96 18 126 66 Z" fill="#7BC47F" ${S}></path><path d="M4 74 Q16 66 28 74 T52 74 T76 74 T100 74 T124 74 T148 74" fill="none" stroke="#1F6FB2" stroke-width="3" stroke-linecap="round"></path><path d="M10 84 Q22 76 34 84 T58 84 T82 84 T106 84 T130 84" fill="none" stroke="#5aa4dc" stroke-width="3" stroke-linecap="round"></path></svg>`,
+ rock:`<svg viewBox="0 0 130 90" role="img" aria-label="picture"><path d="M14 80 Q8 48 34 34 Q50 12 78 20 Q112 24 118 56 Q122 80 110 80 Z" fill="#a9b2bd" ${S}></path><path d="M40 44 Q50 38 58 44 M78 36 Q88 34 92 42" fill="none" stroke="#6b7684" stroke-width="2.5" stroke-linecap="round"></path><path d="M4 82 L126 82" stroke="#1d2433" stroke-width="2.5" stroke-linecap="round"></path></svg>`,
+ cave:`<svg viewBox="0 0 130 90" role="img" aria-label="picture"><path d="M6 84 Q20 14 66 10 Q112 14 124 84 Z" fill="#9aa6b5" ${S}></path><path d="M44 84 Q44 44 66 44 Q88 44 88 84 Z" fill="#1d2433"></path><circle cx="58" cy="66" r="3" fill="#FFD23F"></circle><circle cx="72" cy="70" r="3" fill="#FFD23F"></circle></svg>`,
+ pirate:`<svg viewBox="0 0 120 110" role="img" aria-label="picture"><circle cx="60" cy="62" r="34" fill="#F6D2B0" ${S}></circle><path d="M20 46 Q60 -6 100 46 Z" fill="#1d2433"></path><path d="M14 46 L106 46" stroke="#1d2433" stroke-width="6" stroke-linecap="round"></path><circle cx="60" cy="30" r="6" fill="#fff"></circle><rect x="64" y="54" width="18" height="12" rx="4" fill="#1d2433"></rect><path d="M30 52 L90 66" stroke="#1d2433" stroke-width="3"></path><circle cx="46" cy="60" r="4" fill="#1d2433"></circle><path d="M46 82 Q60 90 74 82" fill="none" stroke="#1d2433" stroke-width="3" stroke-linecap="round"></path></svg>`,
+ treasure:`<svg viewBox="0 0 120 90" role="img" aria-label="picture"><path d="M14 30 L30 2 L106 2 L106 30 Z" fill="#E0A85A" ${S}></path><rect x="10" y="34" width="100" height="50" rx="6" fill="#C98A3E" ${S}></rect><circle cx="40" cy="34" r="9" fill="#FFD23F" ${S}></circle><circle cx="62" cy="30" r="9" fill="#FFD23F" ${S}></circle><circle cx="82" cy="35" r="9" fill="#FFD23F" ${S}></circle></svg>`
+};
+const ship = c => `<svg class="ship" viewBox="0 0 48 40" aria-hidden="true"><path d="M24 4 L24 26" stroke="#1d2433" stroke-width="2.5"></path><path d="M26 6 L40 24 L26 24 Z" fill="#fff" stroke="#1d2433" stroke-width="2" stroke-linejoin="round"></path><path d="M22 8 L10 24 L22 24 Z" fill="${c}" stroke="#1d2433" stroke-width="2" stroke-linejoin="round"></path><path d="M4 27 L44 27 L38 36 L10 36 Z" fill="${c}" stroke="#1d2433" stroke-width="2.5" stroke-linejoin="round"></path></svg>`;
+
+const STOPS=['Pier 碼頭','Ferry 渡輪','Island 上島','Fishball shop','Mochi shop','Tricycle 三輪車','Mini Great Wall','Tortoise Rock','Human Head Rock','Cave 山洞','Treasure!'];
+const GOAL=STOPS.length-1;
+const GROUPS=[
+ {name:'Ferry',c:'#1F6FB2'},{name:'Mochi',c:'#E0A800'},{name:'Fishball',c:'#F2714B'},
+ {name:'Tricycle',c:'#2E9E5B'},{name:'Pirate',c:'#7B4FB0'},{name:'Tortoise',c:'#B5833F'}
+];
+const TYPES={
+ pic:{label:'Picture 看圖寫字',col:'#1F6FB2',time:25,steps:1},
+ zh:{label:'Chinese → English 中譯英',col:'#2E9E5B',time:25,steps:1},
+ scr:{label:'Unscramble 排字母',col:'#E0A800',time:35,steps:2},
+ sen:{label:'Finish the sentence 完成句子',col:'#F2714B',time:35,steps:2},
+ rock:{label:'Rock quiz 認石頭',col:'#7B4FB0',time:20,steps:1},
+ fun:{label:'Fun card 遊戲卡',col:'#c4502c',time:20,steps:1}
+};
+const CARDS=[
+ ...[['ferry','渡輪'],['bus','巴士'],['plane','飛機'],['tricycle','三輪車'],['fishballs','魚蛋'],['mochi','糯米糍'],['watermelon','西瓜'],['island','島'],['rock','石頭'],['cave','山洞'],['pirate','海盜'],['treasure','寶藏']]
+   .map(([w,z])=>({t:'pic',pic:w,ans:w,zh:z,prompt:'What is this?',sub:'寫出英文字'})),
+ ...[['渡輪','ferry'],['島','island'],['山洞','cave'],['海盜','pirate'],['寶藏','treasure'],['小路','path'],['著名的','famous'],['好味','yummy'],['騎','ride'],['石頭','rock']]
+   .map(([z,w])=>({t:'zh',prompt:z,sub:'How do you say it in English?',ans:w,zh:z})),
+ ...[['ISLAND','島'],['PIRATE','海盜'],['TREASURE','寶藏'],['FERRY','渡輪'],['MOCHI','糯米糍'],['CAVE','山洞'],['YUMMY','好味']]
+   .map(([w,z])=>({t:'scr',word:w,ans:w,zh:z,prompt:'Put the letters in order!',sub:'把字母排好'})),
+ {t:'sen',pre:'We take the',post:'to Cheung Chau.',ans:'ferry',zh:'我們坐渡輪去長洲。'},
+ {t:'sen',pre:'I like to eat mango',post:'.',ans:'mochi',zh:'我喜歡吃芒果糯米糍。'},
+ {t:'sen',pre:'You can',post:'a tricycle around the island.',ans:'ride',zh:'你可以踏三輪車環島。'},
+ {t:'sen',pre:'Cheung Po Tsai was a famous',post:'.',ans:'pirate',zh:'張保仔是著名的海盜。'},
+ {t:'sen',pre:'He',post:'his treasure in the cave.',ans:'hid',zh:'他把寶藏收藏在山洞裏。'},
+ {t:'sen',pre:'He hid his treasure in the',post:'.',ans:'cave',zh:'他把寶藏收藏在山洞裏。'},
+ {t:'sen',pre:'The fishballs are so',post:'!',ans:'yummy',zh:'魚蛋很好味！'},
+ {t:'rock',prompt:'烏龜石 is…',opts:['A. Rock of the Skull','B. Tortoise Rock','C. Human Head Rock'],ans:'B. Tortoise Rock',zh:'烏龜石'},
+ {t:'rock',prompt:'人頭石 is…',opts:['A. Human Head Rock','B. Rock of the Ringing Bell','C. Tortoise Rock'],ans:'A. Human Head Rock',zh:'人頭石'},
+ {t:'rock',prompt:'響螺石 is…',opts:['A. Tortoise Rock','B. Rock of the Skull','C. Rock of the Ringing Bell'],ans:'C. Rock of the Ringing Bell',zh:'響螺石'},
+ {t:'fun',prompt:'Pirate voice!',sub:'Everyone in the group says “I am a famous pirate!” in a pirate voice. 用海盜聲音一齊講！',ans:'Every group that does it moves 1!',zh:''},
+ {t:'fun',prompt:'Tricycle race!',sub:'Stand up and pretend to ride a tricycle. Say “ride, ride, ride!” 扮踏三輪車！',ans:'The best group moves 1!',zh:''},
+ {t:'fun',prompt:'Yummy!',sub:'Spell Y-U-M-M-Y out loud together, then rub your tummy. 一齊串出 YUMMY！',ans:'Every group that spells it right moves 1!',zh:''}
+];
+
+let n=4, pos=[], deck=[], card=null, phase='idle', picked=new Set(), timerId=null, drawn=0, winners=[];
+const $=id=>document.getElementById(id);
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const esc=s=>String(s).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+function scramble(w){let s;do{s=shuffle(w.split('')).join('');}while(s===w);return s.split('');}
+
+function newGame(){
+  pos=Array(n).fill(0); deck=shuffle(CARDS.slice()); card=null; phase='idle'; picked=new Set(); drawn=0; winners=[]; stopTimer();
+  document.querySelectorAll('.ctl button').forEach(b=>b.setAttribute('aria-pressed', +b.dataset.n===n));
+  drawMap([]); drawCard();
+}
+
+function drawMap(moved){
+  const m=$('map'); let h='<div></div>';
+  STOPS.forEach((s,i)=>h+=`<div class="stop${i===GOAL?' end':''}">${s}</div>`);
+  for(let g=0;g<n;g++){
+    const G=GROUPS[g];
+    h+=`<div class="gname" style="--c:${G.c}"><span class="dot"></span>${G.name}</div>`;
+    for(let i=0;i<=GOAL;i++){
+      const cls=i===GOAL?'goal':(i>=2?'land':'');
+      h+=`<div class="cell ${cls}">${pos[g]===i?ship(G.c).replace('class="ship"',`class="ship${moved.includes(g)?' go':''}"`):''}${i===GOAL&&pos[g]!==GOAL?'':''}</div>`;
+    }
+  }
+  m.innerHTML=h;
+}
+
+function stopTimer(){clearInterval(timerId);timerId=null;const t=document.querySelector('.timer');if(t){const i=t.querySelector('i');const w=getComputedStyle(i).width;t.classList.remove('run');i.style.width=w;}}
+
+function cardBody(c){
+  if(c.t==='pic') return `<div class="pic">${PIC[c.pic]}</div><div><p class="prompt">${c.prompt}</p><div class="sub">${c.sub}</div></div>`;
+  if(c.t==='zh') return `<div><p class="prompt" style="font-size:clamp(48px,7vw,96px)">${c.prompt}</p><div class="sub">${c.sub}</div></div>`;
+  if(c.t==='scr') return `<div style="display:flex;flex-direction:column;gap:14px;align-items:center"><p class="prompt">${c.prompt}</p><div class="tiles">${c.letters.map(l=>`<b>${l}</b>`).join('')}</div><div class="sub">${c.sub}</div></div>`;
+  if(c.t==='sen') return `<div><p class="prompt">${esc(c.pre)} <span class="gap">&nbsp;</span> ${esc(c.post)}</p><div class="sub">Write the missing word. 寫出欠缺的字</div></div>`;
+  if(c.t==='rock') return `<div style="display:flex;flex-direction:column;gap:14px;align-items:center"><p class="prompt">${c.prompt}</p><div class="choices">${c.opts.map(o=>`<span>${o}</span>`).join('')}</div><div class="sub">Write A, B or C. 寫 A、B 或 C</div></div>`;
+  return `<div style="max-width:820px"><p class="prompt">${c.prompt}</p><div class="sub" style="margin-top:8px">${c.sub}</div></div>`;
+}
+
+function drawCard(){
+  const el=$('card');
+  if(winners.length){
+    const names=winners.map(g=>GROUPS[g].name).join(' & ');
+    el.style.setProperty('--ctype',winners.length>1?'var(--sun)':GROUPS[winners[0]].c);
+    el.innerHTML=`<div class="win"><div>${PIC.treasure}</div><p class="prompt">${names} found the treasure!</p><div class="sub">${names} 找到張保仔的寶藏！</div><button type="button" class="big" id="again">Play again</button></div>`;
+    $('again').onclick=newGame; return;
+  }
+  if(!card){
+    el.style.setProperty('--ctype','var(--sea)');
+    const first=drawn===0;
+    el.innerHTML=`<div class="body" style="flex-direction:column;gap:12px"><p class="prompt">${first?'Ready, groups?':'Ships are sailing!'}</p><div class="sub">${first?`${n} groups · first ship to the treasure wins<br>準備好白板，按 Next card 開始！`:'Look at the map. Who is in front? 看看地圖，誰領先？'}</div><button type="button" class="big" id="next">Next card</button></div>`;
+    $('next').onclick=nextCard; return;
+  }
+  const T=TYPES[card.t];
+  el.style.setProperty('--ctype',T.col);
+  let h=`<div class="top"><span class="type">${T.label}</span><span class="worth">+${T.steps} ${T.steps>1?'stops':'stop'}</span><span class="count">Card ${drawn}</span>`;
+  h+= phase==='ask' ? `<div class="timer run"><i style="animation-duration:${T.time}s"></i></div><span class="secs" id="secs">${T.time}</span>` : `<div class="spacer"></div>`;
+  h+=`</div><div class="body">${cardBody(card)}</div>`;
+  if(phase==='ask'){
+    h+=`<div class="row"><button type="button" class="big alt" id="reveal">Show answer</button></div>`;
+  } else {
+    h+=`<p class="answer">${esc(card.ans)}${card.zh&&card.t!=='fun'?`<small>${esc(card.zh)}</small>`:''}</p>`;
+    h+=`<div class="note">Tap the groups that got it right 點選答對的組</div><div class="row">`;
+    for(let g=0;g<n;g++){const G=GROUPS[g];h+=`<button type="button" class="gbtn" style="--c:${G.c}" data-g="${g}" aria-pressed="${picked.has(g)}"><span class="dot"></span>${G.name}</button>`;}
+    h+=`</div><div class="row"><button type="button" class="big" id="move">${picked.size?'Move ships':'No one / Next card'}</button></div>`;
+  }
+  el.innerHTML=h;
+  if(phase==='ask'){
+    $('reveal').onclick=reveal;
+    let left=T.time; timerId=setInterval(()=>{left--;const s=$('secs');if(s)s.textContent=Math.max(0,left);if(left<=0){stopTimer();beep([[330,.2],[262,.35]]);}},1000);
+  } else {
+    el.querySelectorAll('.gbtn').forEach(b=>b.onclick=()=>{const g=+b.dataset.g;picked.has(g)?picked.delete(g):picked.add(g);drawCard();});
+    $('move').onclick=move;
+  }
+}
+
+function nextCard(){
+  if(!deck.length) deck=shuffle(CARDS.slice());
+  card=deck.pop(); if(card.t==='scr') card={...card,letters:scramble(card.word)};
+  drawn++; phase='ask'; picked=new Set(); beep([[392,.08],[523,.12]]); drawCard();
+}
+function reveal(){stopTimer();phase='check';beep([[523,.12],[659,.2]]);drawCard();}
+function move(){
+  const steps=TYPES[card.t].steps, moved=[...picked];
+  moved.forEach(g=>pos[g]=Math.min(GOAL,pos[g]+steps));
+  drawMap(moved);
+  if(moved.length) beep([[523,.12],[659,.12],[784,.25]]);
+  winners=[...Array(n).keys()].filter(g=>pos[g]===GOAL);
+  if(winners.length){confetti();beep([[523,.15],[659,.15],[784,.15],[1047,.45]]);}
+  card=null; phase='idle'; drawCard();
+}
+
+let ac=null;
+function beep(notes){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();let t=ac.currentTime;notes.forEach(([f,d])=>{const o=ac.createOscillator(),g=ac.createGain();o.type='triangle';o.frequency.value=f;g.gain.setValueAtTime(.16,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(ac.destination);o.start(t);o.stop(t+d);t+=d*.8;});}catch(e){}}
+function confetti(){const box=$('confetti');const cols=['#FFD23F','#F2714B','#1F6FB2','#2E9E5B','#7B4FB0'];for(let i=0;i<80;i++){const p=document.createElement('i');p.style.left=Math.random()*100+'vw';p.style.background=cols[i%cols.length];p.style.animationDelay=Math.random()*.5+'s';box.appendChild(p);}setTimeout(()=>box.innerHTML='',2400);}
+
+document.querySelectorAll('.ctl button').forEach(b=>b.onclick=()=>{n=+b.dataset.n;newGame();});
+$('btnHelp').onclick=()=>{$('help').hidden=!$('help').hidden;};
+$('btnReset').onclick=()=>{const b=$('btnReset');if(b.dataset.c){delete b.dataset.c;b.textContent='New game';newGame();}else{b.dataset.c='1';b.textContent='Click again to restart';setTimeout(()=>{delete b.dataset.c;b.textContent='New game';},3000);}};
+
+newGame();
+})();
+</script>
+
+</body></html>
